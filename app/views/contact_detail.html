@@ -1,0 +1,18 @@
+<!-- http://gopherbook.iris-go.com/forms/ -->
+<!-- *name* for labels should be in Uppercase -->
+<h1>Contact details form</h1>
+
+{{ if .Success }}
+  Thanks!
+{{ else }}
+  <h3>Contact</h3>
+  <form method="POST">
+    <label>Email: </label>
+    <input type="text" name="Email"><br>
+    <label>Subject: </label>
+    <input type="text" name="Subject"><br>
+    <label>Message: </label>
+    <input type="text" name="Message"><br>
+    <input type="submit">
+  </form>
+{{ end }}
