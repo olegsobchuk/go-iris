@@ -32,6 +32,7 @@ func main() {
 	app.Adapt(iris.DevLogger())
 	app.Adapt(httprouter.New())
 	app.Adapt(view.HTML("./app/views/", ".html"))
+	app.StaticWeb("/public", "./app/assets")
 
 	// todos
 	todos := []Todo{
