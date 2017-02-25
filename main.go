@@ -33,6 +33,7 @@ func main() {
 	app.Adapt(httprouter.New())
 	app.Adapt(view.HTML("./app/views/", ".html"))
 	app.StaticWeb("/public", "./app/assets")
+	app.Favicon("./app/assets/images/favicon.ico", "/favicon.ico")
 
 	app.Get("/", func(ctx *iris.Context) {
 		ctx.Render("welcome.html", nil)
