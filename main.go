@@ -34,6 +34,10 @@ func main() {
 	app.Adapt(view.HTML("./app/views/", ".html"))
 	app.StaticWeb("/public", "./app/assets")
 
+	app.Get("/", func(ctx *iris.Context) {
+		ctx.Render("welcome.html", nil)
+	})
+
 	// todos
 	todos := []Todo{
 		{"Initialize application", true},
