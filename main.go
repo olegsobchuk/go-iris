@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kataras/iris/adaptors/sessions"
 	"github.com/kataras/iris/middleware/logger"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/httprouter"
@@ -36,6 +37,10 @@ func main() {
 	app.Adapt(view.HTML("./app/views/", ".html"))
 	app.StaticWeb("/public", "./app/assets")
 	app.Favicon("./app/assets/images/favicon.ico", "/favicon.ico")
+	app.Adapt(sessions.New(sessions.Config{
+		Cookie:       "super_key",
+		DecodeCookie: true,
+	}))
 	// error custom page
 	app.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
 		log.Serve(ctx)
@@ -46,9 +51,35 @@ func main() {
 		ctx.RenderWithStatus(iris.StatusNotFound, "errors/404.html", nil)
 	})
 
+	// Root page
 	app.Get("/", func(ctx *iris.Context) {
 		log.Serve(ctx)
 		ctx.Render("welcome.html", nil)
+	})
+
+	// Session
+	app.Get("/login", func(ctx *iris.Context) {
+		ctx.Session().Set("userID", 1001)
+		userID, error := ctx.Session().GetInt("userID")
+		if error != nil {
+			ctx.Writef("Error has been occurred: %s", error)
+			return
+		}
+		ctx.Writef("Added userID with %d", userID)
+	})
+
+	app.Get("/logout", func(ctx *iris.Context) {
+		ctx.SessionDestroy()
+		ctx.WriteString("Session has been destroyed")
+	})
+
+	app.Get("/try", func(ctx *iris.Context) {
+		userID, error := ctx.Session().GetInt("userID")
+		if error != nil {
+			ctx.WriteString("User unregistred. Follow /login please.")
+			return
+		}
+		ctx.Writef("USER_ID is %d", userID)
 	})
 
 	// todos
