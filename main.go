@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/kataras/iris/middleware/logger"
 	"gopkg.in/kataras/iris.v6"
 	"gopkg.in/kataras/iris.v6/adaptors/httprouter"
 	"gopkg.in/kataras/iris.v6/adaptors/view"
@@ -28,14 +29,25 @@ type User struct {
 
 func main() {
 	app := iris.New(iris.Configuration{Gzip: false, Charset: "UTF-8"})
+	log := logger.New()
 
 	app.Adapt(iris.DevLogger())
 	app.Adapt(httprouter.New())
 	app.Adapt(view.HTML("./app/views/", ".html"))
 	app.StaticWeb("/public", "./app/assets")
 	app.Favicon("./app/assets/images/favicon.ico", "/favicon.ico")
+	// error custom page
+	app.OnError(iris.StatusInternalServerError, func(ctx *iris.Context) {
+		log.Serve(ctx)
+		ctx.RenderWithStatus(iris.StatusNotFound, "errors/500.html", nil)
+	})
+	app.OnError(iris.StatusNotFound, func(ctx *iris.Context) {
+		log.Serve(ctx)
+		ctx.RenderWithStatus(iris.StatusNotFound, "errors/404.html", nil)
+	})
 
 	app.Get("/", func(ctx *iris.Context) {
+		log.Serve(ctx)
 		ctx.Render("welcome.html", nil)
 	})
 
@@ -47,15 +59,18 @@ func main() {
 	}
 
 	app.Get("/todo", func(ctx *iris.Context) {
+		log.Serve(ctx)
 		ctx.Render("todo.html", struct{ Todos []Todo }{todos})
 	})
 
 	// contact_details
 	app.Get("/contact_detail", func(ctx *iris.Context) {
+		log.Serve(ctx)
 		ctx.Render("contact_detail.html", nil)
 	})
 
 	app.Post("/contact_detail", func(ctx *iris.Context) {
+		log.Serve(ctx)
 		// contact := Contact{
 		// 	Email:   ctx.FormValue("email"),
 		// 	Subject: ctx.FormValue("subject"),
@@ -75,6 +90,7 @@ func main() {
 
 	// JSON decode/encode
 	app.Post("/decode_json", func(ctx *iris.Context) {
+		log.Serve(ctx)
 		var user User
 		ctx.ReadJSON(&user)
 
